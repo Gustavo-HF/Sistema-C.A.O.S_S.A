@@ -1,4 +1,3 @@
-import DAO.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -6,7 +5,6 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -76,7 +74,7 @@ public class Main extends JFrame implements ActionListener {
         painelLinhaBaixo.add(botaoSair);
 
         // Criação do JLabel com imagem (imagem na pasta do projeto ou dentro de resources)
-        ImageIcon originalIcon = new ImageIcon("imagens/logo.png");
+        ImageIcon originalIcon = new ImageIcon("src/imagens/Logo.png");
         Image image = originalIcon.getImage().getScaledInstance(150, 100, java.awt.Image.SCALE_SMOOTH);
         icon = new ImageIcon(image);
         //icon = new ImageIcon("imagens/logo.png"); // Caminho relativo ou absoluto

@@ -4,14 +4,21 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import java.sql.Connection;
+import DAO.Conexao;
 
 public class UsuarioService extends JFrame implements ActionListener {
     JPanel painelFundo, painelLinhaLog, painelLinhaPas, painelBotoes;
@@ -19,6 +26,7 @@ public class UsuarioService extends JFrame implements ActionListener {
     JPasswordField senhaUsuario;
     JLabel usuarioLabel, senhaLabel;
     JButton botaoEntrar, botaoVoltar;
+    private static boolean usuarioLogado = false;
 
     public UsuarioService(){
         setTitle("Sistema de Controle Adminitrativo de Objetos Sobrenaturais");
@@ -94,11 +102,61 @@ public class UsuarioService extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e){
         if (e.getSource() == botaoEntrar) {
+             try {
+            // Obtendo os valores inseridos pelo usuário no formulário
+            String nome = nomeUsuario.getText();
+            String senha = new String(senhaUsuario.getPassword());  // Convertendo a senha de JPasswordField
+
+            // Chamando o método logarUser para autenticação
+            boolean loginSucesso = logarUser(nome, senha);
             
+            if (loginSucesso) {
+                // Sucesso no login, redireciona para a tela principal ou outra ação
+                JOptionPane.showMessageDialog(this, "Login bem-sucedido!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                // Aqui você pode fazer qualquer ação após o login bem-sucedido
+                dispose(); // Fecha a tela de login
+                new CadastroService(); // Abre a tela principal ou outra tela de sua aplicação
+            } else {
+                // Se o login falhar
+                JOptionPane.showMessageDialog(this, "Nome de usuário ou senha incorretos.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao realizar login: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
         } else if (e.getSource() == botaoVoltar){
             dispose();
             new Main();
         } 
 
+    }
+
+    public boolean logarUser(String nome, String senha) {
+    try (Connection conn = Conexao.getConexao()) {
+        // Consulta SQL para verificar o nome e a senha do usuário
+        String sql = "SELECT * FROM  TB_CAOS_USUARIO WHERE nom_nome = ? AND cod_senha = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nome); // Configura o nome do usuário na consulta
+            stmt.setString(2, senha); // Configura a senha na consulta
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    // Se encontrar um usuário com essas credenciais, retorna true
+                    return true;
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao processar o ResultSet: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao preparar a consulta: " + e.getMessage());
+        }
+    } catch (Exception e) {
+        System.out.println("Problema com a conexão: " + e.getMessage());
+    }
+
+    // Se não encontrar o usuário ou tiver algum erro, retorna false
+    return false;
     }
 }
